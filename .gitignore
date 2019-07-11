@@ -1,0 +1,7 @@
+tmp/
+recommender/
+.ipynb_checkpoints/
+python/
+*.DS_Store
+__pycache__/
+.env
