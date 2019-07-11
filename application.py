@@ -151,6 +151,8 @@ def train(git_url, site_url, directory_name, table_name):
   #   - Normalizes the vector (L2 norm of 1.0) to normalize the effect of 
   #     document length on the tf-idf values. 
 
+  print('Starting LSA step')
+
   vectorizer = TfidfVectorizer(max_df=0.5, max_features=10000,
                                min_df=1, stop_words='english',
                                use_idf=True)
@@ -180,6 +182,8 @@ def train(git_url, site_url, directory_name, table_name):
 
   # Each value represents the similarity of the terms between one document and another
   # cosine_similarity_matrix(m,n) is the similarity score between documents m and n
+
+  print('Starting similarity measurement step')
 
   similarity_matrix = cosine_similarity(lsa_result, lsa_result)
   print('Cosine similarity matrix', similarity_matrix.shape)
