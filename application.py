@@ -1,22 +1,10 @@
-# Import git
-import git
-
 # Imports for pre-processing
-import sys
+import git, re, frontmatter, os, pprint, time, nltk, yaml, json, shutil, sys
 from bs4 import BeautifulSoup
 from markdown import markdown
-import re
-import frontmatter
-import os
-import pprint
-import time
-import nltk
-import yaml
-import json
 nltk.download('punkt')
 from nltk.stem.porter import PorterStemmer
 porter_stemmer = PorterStemmer()
-import shutil
 
 from nltk.corpus import stopwords 
 nltk.download('stopwords')
@@ -28,7 +16,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import Normalizer
 from sklearn.metrics.pairwise import cosine_similarity
-from numpy import argsort
+from numpy import argsort, concatenate
 
 # Constants
 AWS_REGION_NAME = os.environ['AWS_REGION_NAME']
@@ -63,8 +51,8 @@ def generate_text_array(site_url, directory):
       Returns a text_array and file_meta_array
       text_array[i] contains the text content of the file in file_meta_array[i] """
 
-  text_array = []
-  file_meta_array = []
+  sub_text_array = []
+  sub_file_meta_array = []
   num_md_files = 0
 
   custom_stop_words = ['mr', 'mister', 'ms', 'dr', 'said', 'this', '_blank']
@@ -95,14 +83,14 @@ def generate_text_array(site_url, directory):
           for word in tokens:
             lower_case_word = word.lower()
             if not lower_case_word in stop_words and not lower_case_word in custom_stop_words:
-                  stemmed_text += porter_stemmer.stem(word) + ' '
-              
+              stemmed_text += porter_stemmer.stem(word) + ' '
+
           # Append result to text_array and filename_array
-          text_array.append(stemmed_text)
-          file_meta_array.append({'filename': file, 'title': post['title'], 'url': site_url + post['permalink'] })
+          sub_text_array.append(stemmed_text)
+          sub_file_meta_array.append({'filename': file, 'title': post['title'], 'url': site_url + post['permalink'] })
 
   print('Number of .md files: ', num_md_files)
-  return text_array, file_meta_array
+  return sub_text_array, sub_file_meta_array
 
 def findNRelatedPosts(n, similarity_vec):
     """ Given a similarity vector, find the n closest related posts
@@ -113,10 +101,7 @@ def findNRelatedPosts(n, similarity_vec):
     nRelatedPosts = argsort(-(similarity_vec))
     return nRelatedPosts[1:n+1]
 
-def train(git_url, site_url, directory_name, table_name):
-  """ Run the entire training workflow:
-      download data, preprocess, LSA, and storing values in DynamoDB """
-
+def downloadAndPreprocess(git_url, site_url, directory_name):
   # ============
   # Download data
   # ============
@@ -127,7 +112,7 @@ def train(git_url, site_url, directory_name, table_name):
     shutil.rmtree(directory_name)
 
   print('Cloning repo: ' + git_url + ' to ' + directory_name)
-  repo = git.Repo.clone_from(git_url, directory_name, branch='master', depth=1)
+  git.Repo.clone_from(git_url, directory_name, branch='master', depth=1)
   print('Repo successfully cloned: ' + git_url)
 
   # ============
@@ -136,8 +121,27 @@ def train(git_url, site_url, directory_name, table_name):
 
   # Convert all .md files into text
   print('Start preprocessing markdown to text')
-  text_array, file_meta_array = generate_text_array(site_url, directory_name)
+  sub_text_array, sub_file_meta_array = generate_text_array(site_url, directory_name)
   print('Preprocessed markdown to text')
+
+  # ============
+  # Delete tmp dir
+  # ============
+  if os.path.isdir(directory_name):
+    shutil.rmtree(directory_name)
+
+  return sub_text_array, sub_file_meta_array
+
+def train(site_array):
+  """ Run the entire training workflow:
+      download data, preprocess, LSA, and storing values in DynamoDB """
+
+  text_array, file_meta_array = [], []
+
+  for site in site_array:
+    sub_text_array, sub_file_meta_array = downloadAndPreprocess(site['git_url'], site['site_url'], site['directory_name'])
+    text_array.extend(sub_text_array)
+    file_meta_array.extend(sub_file_meta_array)
 
   # ============
   # LSA
@@ -152,6 +156,7 @@ def train(git_url, site_url, directory_name, table_name):
   #     document length on the tf-idf values. 
 
   print('Starting LSA step')
+  print(type(text_array))
 
   vectorizer = TfidfVectorizer(max_df=0.5, max_features=10000,
                                min_df=1, stop_words='english',
@@ -170,18 +175,12 @@ def train(git_url, site_url, directory_name, table_name):
   pprint.pprint(lsa_result)
 
   # ============
-  # Delete tmp dir
-  # ============
-  if os.path.isdir(directory_name):
-    shutil.rmtree(directory_name)
-
-  # ============
   # Cosine similarity
   # ============
   # Generate a cosine similarity matrix
 
   # Each value represents the similarity of the terms between one document and another
-  # cosine_similarity_matrix(m,n) is the similarity score between documents m and n
+  # similarity_matrix(m,n) is the similarity score between documents m and n
 
   print('Starting similarity measurement step')
 
@@ -208,20 +207,21 @@ def train(git_url, site_url, directory_name, table_name):
            'related_posts': relatedPosts
         }
 
-    related_posts_table = dynamodb.Table(table_name)
+    related_posts_table = dynamodb.Table(AWS_DYNAMODB_TABLE_NAME)
     related_posts_table.put_item(
        Item=item
     )
 
-  print('Training done for ' + site_url)
+  print('Training done for:')
+  print(site_array)
 
 def main():
   with open('isomer-sites.json') as json_file:
     isomer_sites = json.load(json_file)
 
-  for site in isomer_sites:
-    print('Starting training for ', site)
-    train(site['git_url'], site['site_url'], site['directory_name'], AWS_DYNAMODB_TABLE_NAME)
+  for site_array in isomer_sites.values():
+    print('Starting training for ', site_array)
+    train(site_array)
 
 if __name__ == "__main__":
   main()

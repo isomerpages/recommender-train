@@ -6,22 +6,41 @@ This README is meant for the **Admins** of Isomer. It covers information on how 
 
 ### How to add the recommender feature to new Isomer sites
 
-**Update `isomer-sites.json` with the relevant site details**
+`isomer-sites.json` is the configuration file that provides the main `application.py` script with information on which Isomer repo to run the recommender training on. 
 
-This configuration json file provides the main `application.py` script with information on which Isomer repo to run the recommender training on. To add recommender predictions for a new Isomer site, add a new JSON object with `git_url`, `site_url`, and `directory_name` to the `isomer-sites.json` file.
+The Isomer recommender supports two recommendation modes: intra-site and inter-site.
 
-Note: at this point, the recommender system works intra-site. That is, it generates page recommendations within an Isomer repo. We plan to expand the recommender to perform cross-site recommendations in the near future.
+**Intra-site recommendations: recommend pages within the same site**
+To add intra-site recommender predictions to a new Isomer site, add a new array containing a single JSON object with the following fields: `git_url`, `site_url`, and `directory_name`. Refer to `"0"` in the example.
+
+**Inter-site recommendations: recommend pages across different sites**
+To add inter-site recommender predictions for two or more Isomer sites, add a new array containing multiple JSON objects with `git_url`, `site_url`, and `directory_name` to the `isomer-sites.json` file. Refer to `"1"` in the example.
 
 ```
-# isomer-sites.json
+# Sample isomer-sites.json file
+# Example 0: Intra-site recommendations
+# Example 1: Inter-site recommendations
 
-[
-  {
-    "git_url": "https://github.com/isomerpages/isomerpages-govtech.git",
-    "site_url": "https://www.tech.gov.sg",
-    "directory_name": "./tmp/govtech"
-  }
-]
+{
+  "0": [
+    {
+      "git_url": "https://github.com/isomerpages/isomerpages-govtech.git",
+      "site_url": "https://www.tech.gov.sg",
+      "directory_name": "./tmp/govtech"
+    }
+  ],
+  "1": [
+    {
+      "git_url": "https://github.com/isomerpages/isomerpages-boa.git",
+      "site_url": "https://www.boa.gov.sg",
+      "directory_name": "./tmp/boa"
+    }, {
+      "git_url": "https://github.com/isomerpages/isomerpages-hlb.git",
+      "site_url": "https://www.hlb.gov.sg",
+      "directory_name": "./tmp/hlb"
+    }
+  ]
+}
 ```
 
 ### How to develop locally
