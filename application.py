@@ -203,12 +203,10 @@ def train(site_array):
            'related_posts': relatedPosts
         }
 
-    # related_posts_table = dynamodb.Table(AWS_DYNAMODB_TABLE_NAME)
-    # related_posts_table.put_item(
-    #    Item=item
-    # )
-
-    print(item)
+    related_posts_table = dynamodb.Table(AWS_DYNAMODB_TABLE_NAME)
+    related_posts_table.put_item(
+       Item=item
+    )
 
   print('Training done for:')
   print(site_array)
