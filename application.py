@@ -22,6 +22,7 @@ from numpy import argsort, concatenate
 AWS_REGION_NAME = os.environ['AWS_REGION_NAME']
 AWS_DYNAMODB_ENDPOINT = os.environ['AWS_DYNAMODB_ENDPOINT']
 AWS_DYNAMODB_TABLE_NAME = os.environ['AWS_DYNAMODB_TABLE_NAME']
+CONFIG_FILE_NAME = 'config.json'
 
 # Import for DynamoDB
 import boto3
@@ -212,10 +213,10 @@ def train(site_array):
   print(site_array)
 
 def main():
-  with open('isomer-sites.json') as json_file:
-    isomer_sites = json.load(json_file)
+  with open(CONFIG_FILE_NAME) as json_file:
+    config = json.load(json_file)
 
-  for site_array in isomer_sites.values():
+  for site_array in config.values():
     print('Starting training for ', site_array)
     train(site_array)
 
