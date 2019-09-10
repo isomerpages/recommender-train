@@ -6,7 +6,7 @@ This README is meant for the **Admins** of Isomer. It covers information on how 
 
 ### How to add the recommender feature to new Isomer sites
 
-`isomer-sites.json` is the configuration file that provides the main `application.py` script with information on which Isomer repo to run the recommender training on. 
+`config.json` is the configuration file that provides the main `application.py` script with information on which Isomer repo to run the recommender training on. 
 
 The Isomer recommender supports two recommendation modes: intra-site and inter-site.
 
@@ -14,10 +14,10 @@ The Isomer recommender supports two recommendation modes: intra-site and inter-s
 To add intra-site recommender predictions to a new Isomer site, add a new array containing a single JSON object with the following fields: `git_url` and `site_url`. Refer to `"0"` in the example.
 
 **Inter-site recommendations: recommend pages across different sites**
-To add inter-site recommender predictions for two or more Isomer sites, add a new array containing multiple JSON objects with `git_url` and `site_url` to the `isomer-sites.json` file. Refer to `"1"` in the example.
+To add inter-site recommender predictions for two or more Isomer sites, add a new array containing multiple JSON objects with `git_url` and `site_url` to the `config.json` file. Refer to `"1"` in the example.
 
 ```
-# Sample isomer-sites.json file
+# Sample config.json file
 # Example 0: Intra-site recommendations
 # Example 1: Inter-site recommendations
 
