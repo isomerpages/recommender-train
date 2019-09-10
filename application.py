@@ -1,5 +1,5 @@
 # Imports for pre-processing
-import git, re, frontmatter, os, pprint, time, nltk, yaml, json, shutil, sys
+import git, re, frontmatter, os, pprint, time, nltk, yaml, json, shutil, sys, uuid
 from bs4 import BeautifulSoup
 from markdown import markdown
 nltk.download('punkt')
@@ -101,16 +101,12 @@ def findNRelatedPosts(n, similarity_vec):
     nRelatedPosts = argsort(-(similarity_vec))
     return nRelatedPosts[1:n+1]
 
-def downloadAndPreprocess(git_url, site_url, directory_name):
+def downloadAndPreprocess(git_url, site_url):
+  directory_name = "./tmp/" + str(uuid.uuid4())
+
   # ============
   # Download data
   # ============
-
-  # Delete directory if it exists
-  if os.path.isdir(directory_name):
-    print('Deleting dir: ' + directory_name)
-    shutil.rmtree(directory_name)
-
   print('Cloning repo: ' + git_url + ' to ' + directory_name)
   git.Repo.clone_from(git_url, directory_name, branch='master', depth=1)
   print('Repo successfully cloned: ' + git_url)
@@ -118,7 +114,6 @@ def downloadAndPreprocess(git_url, site_url, directory_name):
   # ============
   # Pre-processing
   # ============
-
   # Convert all .md files into text
   print('Start preprocessing markdown to text')
   sub_text_array, sub_file_meta_array = generate_text_array(site_url, directory_name)
@@ -128,6 +123,7 @@ def downloadAndPreprocess(git_url, site_url, directory_name):
   # Delete tmp dir
   # ============
   if os.path.isdir(directory_name):
+    print('Deleting dir: ' + directory_name)
     shutil.rmtree(directory_name)
 
   return sub_text_array, sub_file_meta_array
@@ -139,7 +135,7 @@ def train(site_array):
   text_array, file_meta_array = [], []
 
   for site in site_array:
-    sub_text_array, sub_file_meta_array = downloadAndPreprocess(site['git_url'], site['site_url'], site['directory_name'])
+    sub_text_array, sub_file_meta_array = downloadAndPreprocess(site['git_url'], site['site_url'])
     text_array.extend(sub_text_array)
     file_meta_array.extend(sub_file_meta_array)
 
@@ -207,10 +203,12 @@ def train(site_array):
            'related_posts': relatedPosts
         }
 
-    related_posts_table = dynamodb.Table(AWS_DYNAMODB_TABLE_NAME)
-    related_posts_table.put_item(
-       Item=item
-    )
+    # related_posts_table = dynamodb.Table(AWS_DYNAMODB_TABLE_NAME)
+    # related_posts_table.put_item(
+    #    Item=item
+    # )
+
+    print(item)
 
   print('Training done for:')
   print(site_array)

@@ -11,10 +11,10 @@ This README is meant for the **Admins** of Isomer. It covers information on how 
 The Isomer recommender supports two recommendation modes: intra-site and inter-site.
 
 **Intra-site recommendations: recommend pages within the same site**
-To add intra-site recommender predictions to a new Isomer site, add a new array containing a single JSON object with the following fields: `git_url`, `site_url`, and `directory_name`. Refer to `"0"` in the example.
+To add intra-site recommender predictions to a new Isomer site, add a new array containing a single JSON object with the following fields: `git_url` and `site_url`. Refer to `"0"` in the example.
 
 **Inter-site recommendations: recommend pages across different sites**
-To add inter-site recommender predictions for two or more Isomer sites, add a new array containing multiple JSON objects with `git_url`, `site_url`, and `directory_name` to the `isomer-sites.json` file. Refer to `"1"` in the example.
+To add inter-site recommender predictions for two or more Isomer sites, add a new array containing multiple JSON objects with `git_url` and `site_url` to the `isomer-sites.json` file. Refer to `"1"` in the example.
 
 ```
 # Sample isomer-sites.json file
@@ -25,19 +25,16 @@ To add inter-site recommender predictions for two or more Isomer sites, add a ne
   "0": [
     {
       "git_url": "https://github.com/isomerpages/isomerpages-govtech.git",
-      "site_url": "https://www.tech.gov.sg",
-      "directory_name": "./tmp/govtech"
+      "site_url": "https://www.tech.gov.sg"
     }
   ],
   "1": [
     {
       "git_url": "https://github.com/isomerpages/isomerpages-boa.git",
-      "site_url": "https://www.boa.gov.sg",
-      "directory_name": "./tmp/boa"
+      "site_url": "https://www.boa.gov.sg"
     }, {
       "git_url": "https://github.com/isomerpages/isomerpages-hlb.git",
-      "site_url": "https://www.hlb.gov.sg",
-      "directory_name": "./tmp/hlb"
+      "site_url": "https://www.hlb.gov.sg"
     }
   ]
 }
