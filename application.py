@@ -22,11 +22,16 @@ from numpy import argsort, concatenate
 AWS_REGION_NAME = os.environ['AWS_REGION_NAME']
 AWS_DYNAMODB_ENDPOINT = os.environ['AWS_DYNAMODB_ENDPOINT']
 AWS_DYNAMODB_TABLE_NAME = os.environ['AWS_DYNAMODB_TABLE_NAME']
+CRONITOR_RECOMMENDER_KEY = os.environ['CRONITOR_RECOMMENDER_KEY']
 CONFIG_FILE_NAME = 'config.json'
 
 # Import for DynamoDB
 import boto3
 dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION_NAME, endpoint_url=AWS_DYNAMODB_ENDPOINT)
+
+# Import for Cronitor
+from cronitor import Monitor
+cronitorRecommenderMonitor = Monitor(CRONITOR_RECOMMENDER_KEY)
 
 # Constants
 NUM_RELATED_POSTS = 10 # Define the number of closely related posts we want to display for each post
@@ -213,12 +218,18 @@ def train(site_array):
   print(site_array)
 
 def main():
+  cronitorRecommenderMonitor.run()
+  print('Sent cronitor run ping')
+
   with open(CONFIG_FILE_NAME) as json_file:
     config = json.load(json_file)
 
   for site_array in config.values():
     print('Starting training for ', site_array)
     train(site_array)
+
+  cronitorRecommenderMonitor.complete()
+  print('Sent cronitor complete ping')
 
 if __name__ == "__main__":
   main()
