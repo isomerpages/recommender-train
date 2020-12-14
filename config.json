@@ -4,11 +4,8 @@
       "git_url": "https://github.com/isomerpages/isomerpages-govtech.git",
       "site_url": "https://www.tech.gov.sg"
     }
-  ]
-}
-
-{
-  "0": [
+  ],
+  "1": [
     {
       "git_url": "https://github.com/isomerpages/mewr-eco.git",
       "site_url": "https://www.sgeco.gov.sg"
