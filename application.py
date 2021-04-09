@@ -22,13 +22,22 @@ from numpy import argsort, concatenate
 AWS_REGION_NAME = os.environ['AWS_REGION_NAME']
 AWS_DYNAMODB_ENDPOINT = os.environ['AWS_DYNAMODB_ENDPOINT']
 AWS_DYNAMODB_TABLE_NAME = os.environ['AWS_DYNAMODB_TABLE_NAME']
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 CRONITOR_RECOMMENDER_KEY = os.environ['CRONITOR_RECOMMENDER_KEY']
 CONFIG_FILE_NAME = 'config.json'
 
 # Import for DynamoDB
 import boto3
-dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION_NAME, endpoint_url=AWS_DYNAMODB_ENDPOINT)
+dynamodb = boto3.resource(
+  'dynamodb', 
+  region_name=AWS_REGION_NAME, 
+  endpoint_url=AWS_DYNAMODB_ENDPOINT,
+  aws_access_key_id=AWS_ACCESS_KEY_ID,
+  aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+)
 
+print('successfully init dynamodb')
 # Import for Cronitor
 from cronitor import Monitor
 cronitorRecommenderMonitor = Monitor(CRONITOR_RECOMMENDER_KEY)

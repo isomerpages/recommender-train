@@ -1,0 +1,34 @@
+name: Generate content recommendations for Isomer
+
+on:
+  # Run on push to master or according to the schedule
+  push:
+    branches:
+      - master
+  schedule:
+    # Run daily at midnight
+    - cron:  '0 0 * * *' 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7']
+    name: Generate content recommendations
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Run python script
+        run: pip install -r requirements.txt && python3 application.py
+        env: # Or as an environment variable
+          AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+          AWS_DYNAMODB_ENDPOINT: ${{ secrets.AWS_DYNAMODB_ENDPOINT }}
+          AWS_DYNAMODB_TABLE_NAME: ${{ secrets.AWS_DYNAMODB_TABLE_NAME }}
+          CRONITOR_RECOMMENDER_KEY: ${{ secrets.CRONITOR_RECOMMENDER_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
