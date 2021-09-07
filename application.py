@@ -39,8 +39,8 @@ dynamodb = boto3.resource(
 
 print('successfully init dynamodb')
 # Import for Cronitor
-from cronitor import Monitor
-cronitorRecommenderMonitor = Monitor(CRONITOR_RECOMMENDER_KEY)
+import cronitor
+cronitorRecommenderMonitor = cronitor.Monitor(CRONITOR_RECOMMENDER_KEY)
 
 # Constants
 NUM_RELATED_POSTS = 10 # Define the number of closely related posts we want to display for each post
@@ -227,7 +227,7 @@ def train(site_array):
   print(site_array)
 
 def main():
-  cronitorRecommenderMonitor.run()
+  cronitorRecommenderMonitor.ping(state='run')
   print('Sent cronitor run ping')
 
   with open(CONFIG_FILE_NAME) as json_file:
@@ -237,7 +237,7 @@ def main():
     print('Starting training for ', site_array)
     train(site_array)
 
-  cronitorRecommenderMonitor.complete()
+  cronitorRecommenderMonitor.ping(state='complete')
   print('Sent cronitor complete ping')
 
 if __name__ == "__main__":
